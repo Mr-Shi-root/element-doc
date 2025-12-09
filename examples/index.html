@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Element Business Components - 示例</title>
+  <!-- Element UI CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <style>
+    body {
+      padding: 20px;
+      font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+    }
+    .demo-section {
+      margin-bottom: 40px;
+      padding: 20px;
+      border: 1px solid #EBEEF5;
+      border-radius: 4px;
+    }
+    .demo-section h2 {
+      margin-top: 0;
+      color: #303133;
+    }
+    .demo-section h3 {
+      color: #606266;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #F5F7FA;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Element Business Components 示例</h1>
+
+    <!-- 商品选择器示例 -->
+    <div class="demo-section">
+      <h2>商品选择器 ProductSelector</h2>
+
+      <h3>单选模式</h3>
+      <product-selector
+        v-model="selectedProduct"
+        :data="productList"
+        @change="handleProductChange"
+      ></product-selector>
+      <div class="result">
+        <strong>选中的商品ID：</strong>{{ selectedProduct }}
+      </div>
+
+      <h3>多选模式</h3>
+      <product-selector
+        v-model="selectedProducts"
+        :multiple="true"
+        :data="productList"
+        @change="handleProductsChange"
+      ></product-selector>
+      <div class="result">
+        <strong>选中的商品IDs：</strong>{{ selectedProducts.join(', ') }}
+      </div>
+    </div>
+
+    <!-- 图片上传器示例 -->
+    <div class="demo-section">
+      <h2>图片上传器 ImageUploader</h2>
+
+      <h3>单图上传</h3>
+      <image-uploader
+        v-model="imageUrl"
+        action="https://jsonplaceholder.typicode.com/posts"
+        @change="handleImageChange"
+      ></image-uploader>
+      <div class="result">
+        <strong>图片URL：</strong>{{ imageUrl }}
+      </div>
+
+      <h3>多图上传</h3>
+      <image-uploader
+        v-model="imageUrls"
+        action="https://jsonplaceholder.typicode.com/posts"
+        :multiple="true"
+        :limit="3"
+        @change="handleImagesChange"
+      ></image-uploader>
+      <div class="result">
+        <strong>图片URLs：</strong>
+        <div v-for="(url, index) in imageUrls" :key="index">{{ index + 1 }}. {{ url }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vue 2 -->
+  <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+  <!-- Element UI -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <!-- 组件库（构建后使用） -->
+  <script src="../dist/index.js"></script>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          // 商品选择器
+          selectedProduct: '',
+          selectedProducts: [],
+          productList: [
+            {
+              productId: '1',
+              productName: 'iPhone 15 Pro',
+              productCode: 'IP15P',
+              price: 7999.00,
+              stock: 50
+            },
+            {
+              productId: '2',
+              productName: 'MacBook Pro 14',
+              productCode: 'MBP14',
+              price: 14999.00,
+              stock: 30
+            },
+            {
+              productId: '3',
+              productName: 'AirPods Pro',
+              productCode: 'APP',
+              price: 1999.00,
+              stock: 100
+            },
+            {
+              productId: '4',
+              productName: 'iPad Air',
+              productCode: 'IPA',
+              price: 4799.00,
+              stock: 80
+            },
+            {
+              productId: '5',
+              productName: 'Apple Watch Series 9',
+              productCode: 'AWS9',
+              price: 2999.00,
+              stock: 60
+            }
+          ],
+          // 图片上传器
+          imageUrl: '',
+          imageUrls: []
+        };
+      },
+      methods: {
+        handleProductChange(product) {
+          console.log('选中的商品：', product);
+          this.$message.success('已选择商品：' + product.productName);
+        },
+        handleProductsChange(products) {
+          console.log('选中的商品列表：', products);
+          this.$message.success('已选择 ' + products.length + ' 个商品');
+        },
+        handleImageChange(url) {
+          console.log('图片URL：', url);
+        },
+        handleImagesChange(urls) {
+          console.log('图片URLs：', urls);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
