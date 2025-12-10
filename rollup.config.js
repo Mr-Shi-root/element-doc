@@ -5,6 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import postcss from 'rollup-plugin-postcss';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import terser from '@rollup/plugin-terser';
+import json from '@rollup/plugin-json';
 
 const format = process.env.FORMAT || 'es';
 
@@ -21,6 +22,9 @@ const config = {
     }
   },
   plugins: [
+    // 处理 JSON 文件
+    json(),
+
     // 自动将 peerDependencies 标记为 external
     peerDepsExternal(),
 
