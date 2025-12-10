@@ -1,28 +1,20 @@
-# Element Business Components
-
-基于 Vue2 + Element UI 的业务组件库，封装了常用的业务组件，提高开发效率。
-
-## 特性
-
-- 🚀 基于 Vue2 + Element UI 开发
-- 📦 支持按需引入
-- 🎨 开箱即用的业务组件
-- 📝 完善的文档和示例
-- 🔧 使用 Rollup 打包，支持 ES Module、CommonJS、UMD 多种格式
+# 使用文档
 
 ## 安装
 
 ```bash
-npm install @company/element-business-components --save
+npm install @company/element-business-components
 # 或
 yarn add @company/element-business-components
+# 或
+pnpm add @company/element-business-components
 ```
 
 ## 快速开始
 
 ### 完整引入
 
-```javascript
+```js
 import Vue from 'vue';
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
@@ -30,19 +22,48 @@ import ElementBusinessComponents from '@company/element-business-components';
 
 Vue.use(ElementUI);
 Vue.use(ElementBusinessComponents);
+
+new Vue({
+  el: '#app',
+  render: h => h(App)
+});
 ```
 
-### 按需引入
+### 按需引入（推荐）
 
-```javascript
+```js
 import Vue from 'vue';
 import { ProductSelector, ImageUploader } from '@company/element-business-components';
 
-Vue.component(ProductSelector.name, ProductSelector);
-Vue.component(ImageUploader.name, ImageUploader);
+Vue.component('ProductSelector', ProductSelector);
+Vue.component('ImageUploader', ImageUploader);
+
+// 或者在组件中局部注册
+export default {
+  components: {
+    ProductSelector,
+    ImageUploader
+  }
+};
 ```
 
-## 组件列表
+### CDN 引入
+
+```html
+<!-- 引入 Vue -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<!-- 引入 Element UI -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/@company/element-business-components/dist/index.js"></script>
+
+<script>
+  Vue.use(ElementBusinessComponents);
+</script>
+```
+
+## 组件文档
 
 ### ProductSelector 商品选择器
 
@@ -55,8 +76,8 @@ Vue.component(ImageUploader.name, ImageUploader);
   <div>
     <product-selector
       v-model="selectedProduct"
-      :fetch-data="fetchProductList"
-      @change="handleProductChange"
+      :fetch-data="fetchProducts"
+      @change="handleChange"
     />
   </div>
 </template>
@@ -69,17 +90,16 @@ export default {
     };
   },
   methods: {
-    // 获取商品列表的方法
-    async fetchProductList(params) {
-      // params: { keyword, page, pageSize }
+    async fetchProducts(params) {
+      // 调用后端接口获取商品列表
       const response = await this.$http.get('/api/products', { params });
       return {
         list: response.data.list,
         total: response.data.total
       };
     },
-    handleProductChange(product) {
-      console.log('选中的商品：', product);
+    handleChange(product) {
+      console.log('选中的商品:', product);
     }
   }
 };
@@ -93,7 +113,7 @@ export default {
   <product-selector
     v-model="selectedProducts"
     :multiple="true"
-    :fetch-data="fetchProductList"
+    :fetch-data="fetchProducts"
   />
 </template>
 
@@ -124,14 +144,8 @@ export default {
     return {
       selectedProduct: '',
       productList: [
-        {
-          productId: '1',
-          productName: '商品1',
-          productCode: 'P001',
-          price: 99.00,
-          stock: 100
-        },
-        // ...更多商品
+        { productId: 1, productName: '商品A', productCode: 'A001', price: 100, stock: 50 },
+        { productId: 2, productName: '商品B', productCode: 'B001', price: 200, stock: 30 }
       ]
     };
   }
@@ -152,7 +166,7 @@ export default {
 | tableHeight | 表格高度 | string / number | — | 400 |
 | disabled | 是否禁用 | boolean | — | false |
 | data | 静态数据源 | array | — | [] |
-| fetchData | 获取数据的方法 | function | — | null |
+| fetchData | 获取数据的方法 | function(params) | — | null |
 | valueKey | 值的键名 | string | — | productId |
 | labelKey | 显示的键名 | string | — | productName |
 
@@ -160,11 +174,12 @@ export default {
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| change | 选中值发生变化时触发 | 选中的商品对象或数组 |
+| change | 选中值改变时触发 | 单选：选中的商品对象；多选：选中的商品数组 |
+| input | 绑定值改变时触发 | 单选：商品ID；多选：商品ID数组 |
 
 ---
 
-### ImageUploader 图片上传器
+### ImageUploader 图片上传
 
 用于上传图片的业务组件，支持单图和多图上传，支持预览和删除。
 
@@ -177,7 +192,7 @@ export default {
       v-model="imageUrl"
       action="/api/upload"
       :headers="uploadHeaders"
-      @success="handleUploadSuccess"
+      @success="handleSuccess"
     />
   </div>
 </template>
@@ -193,8 +208,8 @@ export default {
     };
   },
   methods: {
-    handleUploadSuccess(response, file, fileList) {
-      console.log('上传成功：', response);
+    handleSuccess(response, file, fileList) {
+      this.$message.success('上传成功');
     }
   }
 };
@@ -231,8 +246,8 @@ export default {
   <image-uploader
     v-model="imageUrl"
     action="/api/upload"
-    :max-size="2"
     :before-upload="handleBeforeUpload"
+    :max-size="2"
   />
 </template>
 
@@ -263,7 +278,7 @@ export default {
 | 参数 | 说明 | 类型 | 可选值 | 默认值 |
 |------|------|------|--------|--------|
 | value / v-model | 绑定值（图片URL或URL数组） | string / array | — | — |
-| action | 上传地址 | string | — | — |
+| action | 上传地址（必填） | string | — | — |
 | headers | 请求头 | object | — | {} |
 | uploadData | 上传时附带的额外参数 | object | — | {} |
 | name | 上传的文件字段名 | string | — | file |
@@ -275,18 +290,19 @@ export default {
 | disabled | 是否禁用 | boolean | — | false |
 | showTip | 是否显示提示 | boolean | — | true |
 | tipText | 提示文本 | string | — | — |
-| beforeUpload | 自定义上传前校验 | function | — | null |
+| beforeUpload | 自定义上传前校验 | function(file) | — | null |
 
 #### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| change | 绑定值变化时触发 | 图片URL或URL数组 |
-| success | 上传成功时触发 | response, file, fileList |
-| error | 上传失败时触发 | err, file, fileList |
-| exceed | 超出限制时触发 | files, fileList |
-| remove | 删除文件时触发 | file, fileList |
-| preview | 预览图片时触发 | file |
+| change | 绑定值改变时触发 | 单图：图片URL；多图：图片URL数组 |
+| input | 绑定值改变时触发 | 单图：图片URL；多图：图片URL数组 |
+| success | 上传成功时触发 | (response, file, fileList) |
+| error | 上传失败时触发 | (err, file, fileList) |
+| exceed | 超出限制时触发 | (files, fileList) |
+| remove | 删除文件时触发 | (file, fileList) |
+| preview | 预览图片时触发 | (file) |
 
 #### Methods
 
@@ -294,7 +310,98 @@ export default {
 |--------|------|------|
 | clearFiles | 清空文件列表 | — |
 
-## 开发
+## TypeScript 支持
+
+本组件库提供了完整的 TypeScript 类型定义。
+
+```typescript
+import { ProductSelector, ImageUploader } from '@company/element-business-components';
+import type { ProductSelectorProps, ImageUploaderProps } from '@company/element-business-components';
+
+// 使用类型
+const props: ProductSelectorProps = {
+  multiple: true,
+  placeholder: '请选择商品'
+};
+```
+
+## 常见问题
+
+### 1. 如何自定义样式？
+
+组件使用了 scoped 样式，如果需要覆盖样式，可以使用深度选择器：
+
+```css
+/* Vue 2 */
+.my-component >>> .product-selector {
+  /* 自定义样式 */
+}
+
+/* 或使用 /deep/ */
+.my-component /deep/ .product-selector {
+  /* 自定义样式 */
+}
+```
+
+### 2. 上传组件如何处理后端返回格式？
+
+默认情况下，组件会从 `response.data.url` 或 `response.url` 获取图片地址。如果后端返回格式不同，可以监听 `success` 事件自行处理：
+
+```vue
+<image-uploader
+  v-model="imageUrl"
+  action="/api/upload"
+  @success="handleSuccess"
+/>
+
+<script>
+export default {
+  methods: {
+    handleSuccess(response, file, fileList) {
+      // 自定义处理逻辑
+      const url = response.result.imageUrl;
+      this.imageUrl = url;
+    }
+  }
+};
+</script>
+```
+
+### 3. 商品选择器如何自定义表格列？
+
+目前组件内置了固定的表格列。如果需要自定义，建议基于源码进行二次开发，或者提交 Issue 反馈需求。
+
+## 版本管理
+
+### 发布新版本
+
+```bash
+# 补丁版本（bug 修复）1.0.0 -> 1.0.1
+npm run release:patch
+
+# 次版本（新功能）1.0.0 -> 1.1.0
+npm run release:minor
+
+# 主版本（破坏性更新）1.0.0 -> 2.0.0
+npm run release:major
+```
+
+### 手动发布
+
+```bash
+# 1. 构建
+npm run build
+
+# 2. 更新版本号
+npm version patch  # 或 minor / major
+
+# 3. 发布到 npm
+npm publish
+```
+
+## 开发指南
+
+### 本地开发
 
 ```bash
 # 安装依赖
@@ -305,91 +412,21 @@ npm run dev
 
 # 构建
 npm run build
-
-# 构建 ES Module 格式
-npm run build:esm
-
-# 构建 CommonJS 格式
-npm run build:cjs
-
-# 构建 UMD 格式
-npm run build:umd
 ```
 
-## 打包说明
+### 添加新组件
 
-本组件库使用 **Rollup** 进行打包，原因如下：
+1. 在 `packages/components/` 下创建组件目录
+2. 创建 `index.vue` 和 `index.js` 文件
+3. 在 `packages/index.js` 中导出组件
+4. 在 `types/` 下添加类型定义
+5. 更新文档
 
-1. **更适合库打包**：Rollup 专为打包库而设计，生成的代码更简洁
-2. **Tree-shaking 更好**：能更好地移除未使用的代码，减小包体积
-3. **多种输出格式**：同时输出 ES Module、CommonJS、UMD 格式
-4. **打包体积更小**：相比 webpack，打包的库体积更小
-5. **配置更简单**：对于组件库场景，配置更直观
+## 许可证
 
-### 输出格式
+MIT License
 
-- **ES Module** (`es/index.js`)：用于支持 tree-shaking 的现代构建工具
-- **CommonJS** (`lib/index.js`)：用于 Node.js 环境和旧版构建工具
-- **UMD** (`dist/index.js`)：用于浏览器直接引入
+## 联系方式
 
-## 版本管理
-
-本组件库使用语义化版本控制（Semantic Versioning）。
-
-### 发布新版本
-
-```bash
-# 补丁版本（bug 修复）1.0.0 -> 1.0.1
-npm run release:patch
-
-# 次版本（新功能，向后兼容）1.0.0 -> 1.1.0
-npm run release:minor
-
-# 主版本（破坏性更新）1.0.0 -> 2.0.0
-npm run release:major
-```
-
-### 手动发布流程
-
-```bash
-# 1. 构建
-npm run build
-
-# 2. 更新版本号
-npm version patch  # 或 minor / major
-
-# 3. 发布到 npm（需要先登录 npm）
-npm login
-npm publish
-```
-
-## TypeScript 支持
-
-本组件库提供了完整的 TypeScript 类型定义文件，开箱即用。
-
-```typescript
-import { ProductSelector, ImageUploader } from '@company/element-business-components';
-import type { ProductSelectorProps, ImageUploaderProps } from '@company/element-business-components';
-```
-
-## 注意事项
-
-1. 本组件库依赖 Vue2 和 Element UI，使用前请确保已安装这两个依赖
-2. 组件库使用 `peerDependencies` 方式声明依赖，避免重复打包
-3. 上传组件需要配置正确的上传接口地址和请求头
-4. 商品选择器需要提供 `fetchData` 方法或 `data` 属性来获取数据
-5. 支持 Tree Shaking，使用 ES Module 方式引入可以自动移除未使用的代码
-
-## 文档
-
-- [完整使用文档](./USAGE.md)
-- [设计文档](./DESIGN.md)
-- [快速开始](./QUICK_START.md)
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## License
-
-MIT
+- Issues: https://github.com/Mr-Shi-root/element-doc/issues
+- Email: your-email@example.com
