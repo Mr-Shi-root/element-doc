@@ -60,15 +60,32 @@ function showImportantNotices() {
 function showBreakingChanges() {
   try {
     const packageJson = require('../package.json');
-    const version = packageJson.version;
-    const majorVersion = parseInt(version.split('.')[0]);
+    const currentVersion = packageJson.version;
+    const currentMajor = parseInt(currentVersion.split('.')[0]);
 
-    // 如果是主版本更新，显示破坏性变更警告
-    if (majorVersion >= 2) {
-      log('🚨 破坏性变更警告:', 'red');
-      log(`   当前版本 v${version} 包含破坏性变更`, 'red');
-      log('   请查看迁移指南: https://github.com/your-org/element-doc/blob/main/MIGRATION.md', 'yellow');
-      console.log('\n');
+    // 尝试从 package-lock.json 获取之前安装的版本
+    const lockFilePath = path.join(process.cwd(), 'package-lock.json');
+
+    if (fs.existsSync(lockFilePath)) {
+      try {
+        const lockFile = JSON.parse(fs.readFileSync(lockFilePath, 'utf-8'));
+        const previousVersion = lockFile.packages?.['node_modules/@company/element-business-components']?.version;
+
+        if (previousVersion) {
+          const previousMajor = parseInt(previousVersion.split('.')[0]);
+
+          // 只有当主版本号增加时才显示警告
+          if (currentMajor > previousMajor) {
+            log('🚨 破坏性变更警告:', 'red');
+            log(`   从 v${previousVersion} 升级到 v${currentVersion}`, 'red');
+            log(`   主版本更新包含破坏性变更`, 'red');
+            log('   请查看迁移指南: https://github.com/your-org/element-doc/blob/main/MIGRATION.md', 'yellow');
+            console.log('\n');
+          }
+        }
+      } catch (err) {
+        // 无法读取 package-lock.json，跳过
+      }
     }
   } catch (error) {
     // 忽略错误
