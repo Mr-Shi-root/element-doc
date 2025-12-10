@@ -5,18 +5,40 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "unpkg": "dist/index.js",
+  "jsdelivr": "dist/index.js",
+  "types": "types/index.d.ts",
+  "sideEffects": false,
   "files": [
     "lib",
     "es",
     "dist",
-    "packages"
+    "types",
+    "README.md",
+    "LICENSE"
   ],
+  "exports": {
+    ".": {
+      "import": "./es/index.js",
+      "require": "./lib/index.js",
+      "types": "./types/index.d.ts"
+    },
+    "./es": "./es/index.js",
+    "./lib": "./lib/index.js",
+    "./dist": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "type": "module",
   "scripts": {
     "build": "npm run build:esm && npm run build:cjs && npm run build:umd",
     "build:esm": "rollup -c --environment FORMAT:es",
     "build:cjs": "rollup -c --environment FORMAT:cjs",
     "build:umd": "rollup -c --environment FORMAT:umd",
-    "dev": "rollup -c -w"
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build",
+    "version": "npm run build",
+    "release:patch": "npm version patch && npm publish",
+    "release:minor": "npm version minor && npm publish",
+    "release:major": "npm version major && npm publish"
   },
   "repository": {
     "type": "git",
