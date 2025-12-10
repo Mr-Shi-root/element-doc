@@ -1,6 +1,6 @@
 {
   "name": "@company/element-business-components",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "基于 Vue2 + Element UI 的业务组件库",
   "main": "lib/index.js",
   "module": "es/index.js",
